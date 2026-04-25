@@ -1,0 +1,131 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VerteX - AI Job Matching System</title>
+  <style>
+    body{font-family:Arial;background:#0f172a;color:#fff;margin:0;padding:20px}
+    .container{max-width:900px;margin:auto}
+    h1{color:#22c55e}
+    select,input,button{width:100%;padding:10px;margin:8px 0;border-radius:8px;border:none}
+    button{background:#22c55e;color:#000;font-weight:bold;cursor:pointer}
+    .card{background:#1e293b;padding:15px;margin:10px 0;border-radius:10px}
+  </style>
+</head>
+<body>
+<div class="container"><h1>VerteX AI Job Matching</h1><input type="number" id="age" placeholder="Age" /><select id="english">
+  <option value="">English Level</option>
+  <option>B1</option>
+  <option>B2</option>
+  <option>C1</option>
+  <option>C2</option>
+</select><select id="location">
+  <option value="">Location</option>
+  <option>Nasr City</option>
+  <option>Sheikh Zayed</option>
+  <option>Abbassia</option>
+  <option>Sheraton</option>
+  <option>Zahraa El Maadi</option>
+  <option>Gisr El Suez</option>
+  <option>Maadi</option>
+  <option>WFH</option>
+</select><select id="experience">
+  <option value="">Experience</option>
+  <option>0</option>
+  <option>1</option>
+  <option>1-2</option>
+  <option>2-3</option>
+  <option>+3</option>
+</select><select id="graduation">
+  <option value="">Graduation</option>
+  <option>Undergrad</option>
+  <option>Grad</option>
+  <option>Gap year</option>
+  <option>Dropout</option>
+</select><select id="nationality">
+  <option value="">Nationality</option>
+  <option>Egyptian</option>
+  <option>Foreigner</option>
+  <option>Both</option>
+</select><button onclick="findJobs()">Find Matching Jobs</button>
+
+<div id="results"></div></div><script>
+const jobs = [
+  {name:"Wirinix - Appointment Setter", location:"WFH", english:["B2","C1"], expWeight:1.2},
+  {name:"Launch Pad - Sales Agent", location:"Sheikh Zayed", english:["C1"], expWeight:1.4},
+  {name:"ACES - Telesales", location:"Abbassia", english:["B2"], expWeight:1.1},
+  {name:"TTC - Telesales", location:"Nasr City", english:["B2","C1"], expWeight:1.3},
+  {name:"TTP - Telesales", location:"Sheraton", english:["B2","C1"], expWeight:1.3},
+  {name:"REZ - Cold Caller", location:"WFH", english:["B2","C1"], expWeight:1.5},
+  {name:"Nexaura - Cold Calling", location:"Gisr El Suez", english:["B2","C1","C2"], expWeight:1.4},
+  {name:"LeadBull - Telesales", location:"Zahraa El Maadi", english:["B2","C1"], expWeight:1.6},
+  {name:"Symbios - BDR", location:"Nasr City", english:["C1","C2"], expWeight:1.8}
+];
+
+function getEnglishScore(level){
+  if(level=="B1") return 1;
+  if(level=="B2") return 2;
+  if(level=="C1") return 3;
+  if(level=="C2") return 4;
+  return 0;
+}
+
+function createCard(name, score){
+  return `<div class='card'><h3>${name}</h3><p>${score}% AI Match</p></div>`;
+}
+
+function findJobs(){
+
+  let age=parseInt(document.getElementById('age').value);
+  let english=document.getElementById('english').value;
+  let location=document.getElementById('location').value;
+  let experience=document.getElementById('experience').value;
+  let graduation=document.getElementById('graduation').value;
+  let nationality=document.getElementById('nationality').value;
+
+  let result=document.getElementById('results');
+  result.innerHTML="";
+
+  if(!age || age<18){
+    alert("Must be 18+");
+    return;
+  }
+
+  let userEng=getEnglishScore(english);
+  let userExp=parseFloat(experience)||0;
+
+  jobs.forEach(job=>{
+
+    let score=0;
+
+    // AI weighted scoring system
+    if(job.location===location) score+=20;
+
+    // English AI match
+    let jobEng=Math.max(...job.english.map(getEnglishScore));
+    score+= (userEng/jobEng)*25;
+
+    // Experience weight AI
+    score+= userExp * job.expWeight * 10;
+
+    // Graduation AI bonus
+    if(graduation=="Grad") score+=10;
+    else if(graduation=="Undergrad") score+=7;
+    else score+=5;
+
+    // Nationality soft match
+    if(nationality=="Egyptian") score+=8;
+    else score+=6;
+
+    // Age compatibility AI curve
+    let ageScore=age<=30?10:5;
+    score+=ageScore;
+
+    score=Math.min(100,Math.round(score));
+
+    if(score>=50){
+      result.innerHTML+=createCard(job.name,score);
+    }
+  });
+}
+</script></body>
+</html>
